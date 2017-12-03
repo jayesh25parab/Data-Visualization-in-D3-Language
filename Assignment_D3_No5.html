@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<style>
+</style>
+<body>
+<div class="Network"></div>
+<script>
+
+// Defining width and height of layout
+var width = "100%",
+    height = 800;
+
+// load the data
+
+d3.json("data.json", function(error, data) {
+
+	var svg = d3.selectAll("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+	.style('background', '#C9D7D6');
+	
+	var tooltip = d3.select("body")
+	.append("div")
+	.style("position", "absolute")
+	.style("z-index", "10")
+	.style("visibility", "hidden");
+	
+	d3.selection.prototype.moveToFront = function() {
+		return this.each(function(){
+		this.parentNode.appendChild(this);
+	});
+	};	
+    data.nodes.forEach(function(d) {
+        d.id = d.id;
+		d.x =d.x;
+		d.y =d.y;
+    })
+	data.links.forEach(function(d) {
+        d.node01 = d.node01;
+		d.node02 =d.node02;
+		d.amount =d.amount;
+    })
+	var total = [];
+	var i = 0;
+	data.nodes.forEach(function(d) {
+		var site_name = d.id;
+		total[i] = 0;
+		data.links.forEach(function(d) {
+			if (d.node01 === site_name || d.node02 === site_name)
+			{
+				total[i] = total[i] + d.amount;
+			}
+		})
+		i = i + 1;
+	})
+	//console.log(total);
+	var j = 0;
+	data.nodes.forEach(function(d) {
+		var total_weight = total[j];
+		svg.append("circle")
+		.attr("cx", d.x)
+		.attr("cy", d.y)
+		.attr("r",total[j]/100)
+		.attr("fill", "blue")
+		// Printing text on circles and rendering them
+		.on("mouseover", function(){
+			var sel = d3.select(this);
+			sel.moveToFront();
+			d3.select(this).style("stroke", "black");
+			return tooltip.html("Site Name: " + d.id + "<br> Total Amount:" + total_weight ).style("visibility", "visible");})
+		.on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+		.on("mouseout", function(){
+			d3.select(this).style("stroke", "#ccc");
+			return tooltip.style("visibility", "hidden");});
+		j = j + 1;
+		
+	})
+	
+	// Drawing Lines
+	var i =0;	
+	data.links.forEach(function(d) {
+        d.node01 = d.node01;
+		d.node02 =d.node02;
+		d.amount =d.amount;
+		var site_s = d.node01;
+		var site_t = d.node02;
+		var amount = d.amount;
+		var x1 = 0,
+			y1 = 0,
+			x2 = 0,
+			y2 = 0,
+			j = 0;
+		data.nodes.forEach(function(d) {
+			d.id = d.id;
+			d.x =d.x;
+			d.y =d.y;
+			if(d.id === site_s)
+				{	
+					x1 = d.x;
+					y1 = d.y;
+				}
+			if(d.id === site_t)
+				{
+					x2 = d.x;
+					y2 = d.y; 
+				}
+			if ( x1 != 0 && x2 != 0 && y1 != 0 && y2 != 0 && j===0)
+				{
+					j = 1;
+					svg.append("line")
+						  .attr("x1", x1)
+						  .attr("y1", y1)
+						  .attr("x2", x2)
+						  .attr("y2", y2)
+						  .attr("stroke", "black")
+						  .attr("stroke-width", amount/100)
+						  // Printing text on lines 
+						  .on("mouseover", function(){
+							d3.select(this).style("stroke", "red");
+							return tooltip.html("Source: "+ site_s + " to Destination: " + site_t + " <br>For amount : " + amount).style("visibility", "visible");})
+						  .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+						  .on("mouseout", function(){
+							d3.select(this).style("stroke", "orange");
+							return tooltip.style("visibility", "hidden");});
+				}
+				
+			
+		})
+    })	
+});
+
+</script>
+</body>	
