@@ -1,0 +1,4 @@
+Represent different sites nodes by circles and site links by lines using D3.
+Make sure when you move mouse pointer over any site it shows its id, x co-ordinate and y co-ordinate 
+and is highlighted using black circle.
+When you move your mouse pointer over any link it highlights and shows links details.
